@@ -1,4 +1,4 @@
-FROM pro97775/heroku:ownv3
+FROM pro97775/wzmlx:wzadv
 
 WORKDIR /usr/src/app
 RUN chmod 777 /usr/src/app
