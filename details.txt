@@ -1,0 +1,18 @@
+Removal complete and verified (`compileall` clean, `pyflakes` shows only pre-existing star-import/unused notes, `plugins/index.json` still parses).
+
+What was deleted outright:
+
+- `myjd/`, `sabnzbdapi/`, `configs/sabnzbd/`, `plugins/nzb_search/`
+- `bot/core/jdownloader_booter.py`, `bot/helper/listeners/{jdownloader,nzb}_listener.py`, `download_utils/{jd_download,nzb_downloader}.py`, `status_utils/{jdownloader,nzb}_status.py`
+- `bot/helper/ext_utils/hyperul_utils.py`
+
+HyperUL: `TelegramUploader` no longer delegates to `HypertgUpload`. I inlined the pieces it actually needed — thumbnail/metadata resolution, flood-retry send, and a single `_send_file` that picks `TgClient.user` or the listener client. Uploads are now sequential again (the parallel `ensure_future` fan-out only existed because HyperUL spread files across helper bots), and the `hul` status suffix is gone. `USE_HYPER`/`HYPER_*` remain, now covering HyperDL only.
+
+JDownloader/SABnzbd: commands (`/jdmirror`, `/jdleech`, `/nzbmirror`, `/nzbleech`), handlers, `is_jd`/`is_nzb` listener flags, the Hydra NZB URL shim in `/uphoster`, bot-settings menus (Sabnzbd Settings, JDownloader Sync, usenet server editors), status/stats/restart integrations, `bot_lock` pause targets, `db_handler.update_nzb_config`, the SABnzbd web proxy and file-tree branch in `web/`, and the SABnzbd launch block in `setpkgs.sh`.
+
+Config keys dropped from both `Config` and `config_sample.py`: `DISABLE_JD`, `DISABLE_NZB`, `JD_EMAIL`, `JD_PASS`, `JD_LIMIT`, `NZB_LIMIT`, `USENET_SERVERS`, `HYDRA_IP`, `HYDRA_API_KEY`, plus `BinConfig.SABNZBD_NAME`.
+
+Two things worth flagging:
+
+- `wz_bin.bin_name(4)` (the SABnzbd binary) is no longer referenced; if `wz_bin` is your own package you may want to drop that entry and the SABnzbd binary from the image.
+- Existing Mongo deployments still hold `settings.nzb` documents and the removed config keys. Nothing reads them now, so they're inert, but I did not migrate or delete them — say the word if you want a cleanup step.
