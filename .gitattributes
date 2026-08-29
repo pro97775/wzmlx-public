@@ -1,1 +1,11 @@
+.venv/
+config.py
+token.pickle
+credentials.json
+rclone.conf
+.netrc
+log.txt
+# ... (the rest of your list)
+__pycache__/
+.git
 *.sh text eol=lf
