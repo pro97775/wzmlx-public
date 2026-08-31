@@ -317,6 +317,7 @@ class Config:
             if not value:
                 raise ValueError(f"{key} variable is missing!")
 
+DEFAULT_CONFIG = Config.get_all()
 
 class BinConfig:
     ARIA2_NAME = "blitzfetcher"
