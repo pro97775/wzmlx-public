@@ -8,6 +8,23 @@ from ...core.config_manager import Config
 from .tg_utils import chat_info
 
 
+def _source_message(update):
+    return getattr(update, "message", None) or update
+
+
+def _chat_context(update):
+    message = _source_message(update)
+    chat = getattr(message, "chat", None)
+    if chat is None:
+        return None, None
+    thread_id = (
+        message.message_thread_id
+        if getattr(message, "is_topic_message", False)
+        else None
+    )
+    return chat.id, thread_id
+
+
 class CustomFilters:
     async def owner_filter(self, _, update):
         user = update.from_user or update.sender_chat
