@@ -119,6 +119,29 @@ async def add_mega_download(listener, path):
             folder_api._listener_ref = folder_listener
             dl_listener = folder_listener
 
+            # --- PREMIUM AUTHENTICATION FIX ---
+            if mega_email and mega_password:
+                LOGGER.info("Mega: authenticating premium account for folder download")
+                
+                # 1. Login to the main API first
+                await async_api.login(mega_email, mega_password)
+                if listener.is_cancelled or async_api._mega_listener.is_cancelled:
+                    return
+                if async_api._mega_listener.error:
+                    await listener.on_download_error(_mega_error_format(async_api._mega_listener.error))
+                    return
+
+                # 2. Extract local auth and apply it instantly to avoid IP bans
+                account_auth = api.getAccountAuth()
+                if not account_auth:
+                    await listener.on_download_error("Failed to obtain MEGA account authentication.")
+                    return
+
+                folder_api.setAccountAuth(account_auth)
+                LOGGER.info("Mega: premium account auth applied to folder API")
+                del account_auth
+            # ----------------------------------
+
             await async_api.loginToFolder(listener.link)
             if listener.is_cancelled or dl_listener.is_cancelled:
                 return
